@@ -2,6 +2,9 @@ env:
     CIRRUS_CLONE_DEPTH: 1
     BUILD_HOSTNAME: "CirrusCI"
     CIRRUS_WORKING_DIR: "/home/doraemon/"
+    VER: "v6.0-rc1"
+    RCLONE: "ENCRYPTED[a653c3969ca50580a19a454b1b0bc0a7e8d479101ca8b50d974c307b7db336daa1f795815ad85e48f137b5e4fa46df27]"
+    TOKEN: "ENCRYPTED[6ee66d7cf4c511c09208efe1df1fd0b0bfc3bc50ba77eae2aa2e4a5f7fb87cd2f08fcf1be6cc459c457138910e428dac]"
 
 task:
   name: Linux 6.0-rc1 - Xiaomi Redmi Note 10 Pro
@@ -12,7 +15,7 @@ task:
 
   clone_script:
     - cd ~/
-    - git clone -b v6.0-rc1 --single-branch https://github.com/dopaemon/linux.git
+    - git clone -b "$VER" --single-branch https://github.com/dopaemon/linux.git
     - git clone -b main --single-branch https://github.com/Positron-B/android_prebuilts_gcc_linux-x86_aarch64_aarch64-none-linux-gnu.git gcc
   build_script:
     - cd ~/
@@ -24,4 +27,10 @@ task:
     - make O=out sm7150.config
     - make O=out Image.gz dtbs -j$(nproc --all)
     - make O=out bindeb-pkg -j$(nproc --all)
-
+  upload_script:
+    - sudo apt update && sudo apt install -y "$RCLONE"
+    - mkdir -p ~/.config/"$RCLONE"
+    - echo "$RCLONE" > ~/.config/"$RCLONE"/"$RCLONE".conf
+    - cd ~/linux
+    - zip -rv9 "$VER".zip out
+    - "$RCLONE" copy -v "$VER" cirrus:"$VER"/
