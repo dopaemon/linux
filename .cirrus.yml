@@ -28,9 +28,13 @@ task:
     - make O=out Image.gz dtbs -j$(nproc --all)
     - make O=out bindeb-pkg -j$(nproc --all)
   upload_script:
-    - sudo apt update && sudo apt install -y "$RCLONE"
-    - mkdir -p ~/.config/"$RCLONE"
-    - echo "$RCLONE" > ~/.config/"$RCLONE"/"$RCLONE".conf
-    - cd ~/linux
-    - zip -rv9 "$VER".zip out
-    - "$RCLONE" copy -v "$VER" cirrus:"$VER"/
+    - cd ~/linux/
+    - zip -rv9 $VER.zip out
+    - sudo apt update && sudo apt install -y $RCLONE
+    - mkdir -p /root/.config/$RCLONE
+    - mkdir -p ~/.config/$RCLONE
+    - touch /root/.config/$RCLONE/$RCLONE.conf
+    - touch ~/.config/$RCLONE/$RCLONE.conf
+    - echo "$TOKEN" > /root/.config/$RCLONE/$RCLONE.conf
+    - echo "$TOKEN" > ~/.config/$RCLONE/$RCLONE.conf
+    - $RCLONE copy -v $VER.zip cirrus:$VER/
